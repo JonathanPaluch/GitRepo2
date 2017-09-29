@@ -1,0 +1,141 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+  
+    "Description" : "VISIER - EC2 Linux Instance",
+     
+    "Parameters" : {
+        "KeyName" : {
+            "Description" : "Name of an existing EC2 KeyPair",
+            "Type" : "AWS::EC2::KeyPair::KeyName",
+            "Default" : "KP-ITOps"
+            },
+    
+        "SubnetId" : {
+            "Description" : "Subnet Id (Default is SUB-001-UW2A-Private)",
+            "Type" : "AWS::EC2::Subnet::Id",
+            "Default" : "subnet-c8a80aae"
+            },
+    
+        "MSGName" : {
+            "Description" : "Multiple Security Group (Management group for your OS has been preselected)",
+            "Type" : "AWS::EC2::SecurityGroup::Id",
+            "Default" : "sg-e0bcab9a"
+            },
+        
+        "Name" : {
+            "Description" : "Instance Name",
+            "Type" : "String"
+            },
+
+        "Contact" : {
+            "Description" : "Instance Contact (Email)",
+            "Type" : "String",
+            "Default" : "IT@visier.com"
+            },
+
+        "Owner" : {
+            "Description" : "Instance Owner",
+            "Type" : "String",
+            "Default" : "750-Information Technology",
+            "AllowedValues" : [ "200-Customer Success", "250-Services", "400-Sales", "450-Partnerships", "500-Marketing", "600-Development", "610-DevOps", "620-Data Management", "650-Product Management", "700-Administration", "750-Information Technology", "760-GRC & Privacy", "770-Information Security"]
+            },
+
+        "SystemCode" : {
+            "Description" : "System Code",
+            "Type" : "String"
+            },
+
+        "AMIImage" : {
+            "Description" : "Instance AMI Image",
+            "Type" : "String",
+            "Default" : "ami-e3e6189b"
+            },
+    
+        "InstanceType" : {
+            "Description" : "Amazon EC2 instance type",
+            "Type" : "String",
+            "Default" : "t2.small",
+            "AllowedValues" : [ "t2.micro", "t2.small", "t2.medium", "t2.large", "t2.xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c4.large", "c4.xlarge", "r3.large", "r3.xlarge"]
+            }
+        },
+  
+    "Resources" : {
+            
+        "InstanceSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+            "VpcId" : "vpc-eb23b08d",
+            "GroupDescription" : {"Fn::Join" : [ "-", [ "ISG", {"Ref" : "Name"} ] ]},
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": {"Fn::Join" : [ "-", [ "ISG", {"Ref" : "Name"} ] ]}
+                    }
+                ]
+            }
+        },
+      "LinuxServer": {
+        "Type" : "AWS::EC2::Instance",      
+        "Properties": {
+          "InstanceType" : { "Ref" : "InstanceType" },
+          "DisableApiTermination" : "True",
+          "SubnetId": {"Ref" : "SubnetId"},
+          "IamInstanceProfile" : "AMZN-SystemsManager",
+          "SecurityGroupIds" : [
+              {"Ref" : "InstanceSecurityGroup"},
+              "sg-e0bcab9a",
+              {"Ref" : "MSGName"}
+            ],
+          "ImageId" : {"Ref" : "AMIImage"},
+          "KeyName" : { "Ref" : "KeyName"},
+          "Tags": [
+            {
+                "Key": "EBS-Snapshots",
+                "Value": "True"
+                },
+            {
+                "Key": "SSM-UpdateSSMAgent",
+                "Value": "True"
+                },
+            {
+                "Key": "SSM-InsightIDRLinux",
+                "Value": "True"
+                },
+            {
+                "Key": "SSM-SymantecEndpointLinux",
+                "Value": "True"
+                },
+            {
+               "Key": "SSM-NewRelicLinux",
+                "Value": "True" 
+                },
+            {
+               "Key": "SSM-BaseConfigLinux",
+                "Value": "True" 
+                },
+            {
+               "Key": "SSM-PBISLinux",
+                "Value": "True" 
+                },
+            {
+                "Key" : "Name",
+                "Value" : { "Ref" : "Name" }
+                },
+            {
+                "Key" : "Contact",
+                "Value" : { "Ref" : "Contact" }
+                },
+            {
+                "Key" : "Owner",
+                "Value" : { "Ref" : "Owner" }
+                },
+            {
+                "Key" : "System Code",
+                "Value" : { "Ref" : "SystemCode" }
+            }
+            ]
+        }
+      }
+    }
+}
+  
